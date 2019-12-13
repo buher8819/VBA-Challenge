@@ -1,0 +1,142 @@
+Attribute VB_Name = "Stock_sorter"
+Sub TestStock()
+
+For Each ws In Worksheets
+
+Dim ticker_name As String
+Dim stock_total As Double
+Dim row_counter As Integer
+Dim first_open As Double
+Dim last_close As Double
+Dim percent_change As Double
+Dim yearly_change As Variant
+Dim other_row_counter As Integer
+
+Dim max_percentage As Double
+Dim max_percentage_ticker As String
+Dim min_percentage As Double
+Dim min_percentage_ticker As String
+Dim max_value As Double
+Dim max_value_ticker As String
+
+
+stock_total = 0
+row_counter = 2
+other_row_counter = 2
+first_open = 0
+last_close = 0
+yearly_change = 0
+percent_change = 0
+max_percentage = 0
+min_percentage = 0
+max_value = 0
+
+ws.Cells(1, 9).Value = "Ticker"
+ws.Cells(1, 10).Value = "Yearly Change"
+ws.Cells(1, 11).Value = "Percent Change"
+ws.Cells(1, 12).Value = "Total Stock Volume"
+ws.Cells(2, 15).Value = "Greatest % Increase"
+ws.Cells(3, 15).Value = "Greatest % Decrease"
+ws.Cells(4, 15).Value = "Greatest Total Volume"
+ws.Cells(1, 16).Value = "Ticker"
+ws.Cells(1, 17).Value = "Value"
+
+
+For i = 2 To ws.Cells(Rows.Count, 1).End(xlUp).Row
+
+    
+    If ws.Cells(i - 1, 1).Value <> ws.Cells(i, 1).Value Then
+        
+        first_open = ws.Cells(i, 3).Value
+    
+    
+    ElseIf ws.Cells(i + 1, 1).Value <> ws.Cells(i, 1).Value Then
+    
+        ticker_name = ws.Cells(i, 1).Value
+        
+        stock_total = stock_total + ws.Cells(i, 7).Value
+        yearly_change = last_close - first_open
+        
+        'This conditional is being used to avoid any divide by zero errors
+        If (yearly_change = 0 And first_open = 0) Or (first_open = 0) Then
+            
+            first_open = 1
+            
+        End If
+        
+        percent_change = (yearly_change / first_open)
+        
+        ws.Range("I" & row_counter).Value = ticker_name
+        ws.Range("J" & row_counter).Value = yearly_change
+        ws.Range("L" & row_counter).Value = stock_total
+        ws.Range("K" & row_counter).Value = percent_change
+        ws.Range("K" & row_counter).NumberFormat = "0.00%"
+        
+        row_counter = row_counter + 1
+        
+        stock_total = 0
+        first_open = 0
+        last_close = 0
+        yearly_change = 0
+        percent_change = 0
+        
+        
+    Else
+        
+        stock_total = stock_total + ws.Cells(i, 7).Value
+        last_close = ws.Cells(i + 1, 6).Value
+        
+    End If
+
+ 
+Next i
+
+
+For j = 2 To ws.Cells(Rows.Count, 9).End(xlUp).Row
+    
+    If ws.Range("K" & other_row_counter).Value > 0 Then
+    
+        ws.Range("K" & other_row_counter).Interior.ColorIndex = 4
+        
+    ElseIf ws.Range("K" & other_row_counter).Value < 0 Then
+    
+        ws.Range("K" & other_row_counter).Interior.ColorIndex = 3
+        
+    End If
+    
+    
+    If ws.Cells(j, 12).Value > max_value Then
+        
+        max_value = ws.Cells(j, 12).Value
+        max_value_ticker = ws.Cells(j, 9).Value
+        ws.Cells(4, 17).Value = max_value
+        ws.Cells(4, 16).Value = max_value_ticker
+        
+    ElseIf ws.Cells(j, 11).Value < min_percentage Then
+        
+        min_percentage = ws.Cells(j, 11).Value
+        min_percentage_ticker = ws.Cells(j, 9).Value
+        ws.Cells(3, 17).Value = min_percentage
+        ws.Cells(3, 16).Value = min_percentage_ticker
+        ws.Cells(3, 17).NumberFormat = "0.00%"
+        
+    ElseIf ws.Cells(j, 11).Value > max_percentage Then
+        
+        max_percentage = ws.Cells(j, 11).Value
+        max_percentage_ticker = ws.Cells(j, 9).Value
+        ws.Cells(2, 17).Value = max_percentage
+        ws.Cells(2, 16).Value = max_percentage_ticker
+        ws.Cells(2, 17).NumberFormat = "0.00%"
+        
+
+    End If
+    
+    other_row_counter = other_row_counter + 1
+    
+Next j
+
+    
+Next ws
+
+
+End Sub
